@@ -26,7 +26,7 @@
   }
 
   // ---------- control ----------
-  L.Control.Currentviewer = L.Control.extend({
+  L.Control.inaflowsviewer = L.Control.extend({
     options: {
       position: 'bottomleft',
 
@@ -81,8 +81,8 @@
       this.animationTimer = false;
 
       // Kontainer + button "open"
-      this.container = L.DomUtil.create('div', 'leaflet-control-rainviewer leaflet-bar leaflet-control');
-      this.link = L.DomUtil.create('a', 'leaflet-control-rainviewer-button leaflet-bar-part', this.container);
+      this.container = L.DomUtil.create('div', 'leaflet-control-inaflowsviewer leaflet-bar leaflet-control');
+      this.link = L.DomUtil.create('a', 'leaflet-control-inaflowsviewer-button leaflet-bar-part', this.container);
       this.link.href = '#';
 
       // Buka panel dan mulai load
@@ -98,7 +98,7 @@
     // ---------- UI open/close ----------
     _open: function (e) {
       L.DomEvent.stopPropagation(e); L.DomEvent.preventDefault(e);
-      if (L.DomUtil.hasClass(this.container, 'leaflet-control-rainviewer-active')) {
+      if (L.DomUtil.hasClass(this.container, 'leaflet-control-inaflowsviewer-active')) {
         this.unload();
       } else {
         this.load();
@@ -110,7 +110,7 @@
       // remove UI
       if (this.controlContainer) { L.DomUtil.remove(this.controlContainer); this.controlContainer = null; }
       if (this.closeButton) { L.DomUtil.remove(this.closeButton); this.closeButton = null; }
-      L.DomUtil.removeClass(this.container, 'leaflet-control-rainviewer-active');
+      L.DomUtil.removeClass(this.container, 'leaflet-control-inaflowsviewer-active');
       // remove layers
       const map = this._map;
       Object.values(this.layersMag).forEach(l => map && map.hasLayer(l) && map.removeLayer(l));
@@ -132,7 +132,7 @@
           if (latest) this.options.modelrun = latest;
           if (!this.options.modelrun) throw new Error('No modelrun resolved');
         } catch (err) {
-          console.warn('[Currentviewer] Gagal ambil modelrun, fallback YYYYMMDD0000 UTC:', err);
+          console.warn('[inaflowsviewer] Gagal ambil modelrun, fallback YYYYMMDD0000 UTC:', err);
           const now = new Date();
           const p = n=>String(n).padStart(2,'0');
           this.options.modelrun = `${now.getUTCFullYear()}${p(now.getUTCMonth()+1)}${p(now.getUTCDate())}0000`;
@@ -154,7 +154,7 @@
       this.animationPosition = this.timestamps.length - 1;
 
       // 3) build UI
-      L.DomUtil.addClass(this.container, 'leaflet-control-rainviewer-active');
+      L.DomUtil.addClass(this.container, 'leaflet-control-inaflowsviewer-active');
       this._buildUI();
 
       // 4) show first and preload next
@@ -167,7 +167,7 @@
       const t = this;
 
       // container
-      this.controlContainer = L.DomUtil.create('div', 'leaflet-control-rainviewer-container', this.container);
+      this.controlContainer = L.DomUtil.create('div', 'leaflet-control-inaflowsviewer-container', this.container);
       // cegah drag/zoom saat interaksi control
       const stop = (e)=>{ e.preventDefault(); e.stopPropagation(); };
       this.controlContainer.addEventListener('mousedown', stop);
@@ -175,35 +175,35 @@
       this.controlContainer.addEventListener('dblclick', stop);
 
       // prev
-      this.prevButton = L.DomUtil.create('input', 'leaflet-control-rainviewer-prev leaflet-bar-part btn', this.controlContainer);
+      this.prevButton = L.DomUtil.create('input', 'leaflet-control-inaflowsviewer-prev leaflet-bar-part btn', this.controlContainer);
       this.prevButton.type = "button";
       this.prevButton.value = this.options.prevButtonText;
       L.DomEvent.on(this.prevButton, 'click', t.prev, this);
       L.DomEvent.disableClickPropagation(this.prevButton);
 
       // play/stop
-      this.startstopButton = L.DomUtil.create('input', 'leaflet-control-rainviewer-startstop leaflet-bar-part btn', this.controlContainer);
+      this.startstopButton = L.DomUtil.create('input', 'leaflet-control-inaflowsviewer-startstop leaflet-bar-part btn', this.controlContainer);
       this.startstopButton.type = "button";
       this.startstopButton.value = this.options.playStopButtonText;
       L.DomEvent.on(this.startstopButton, 'click', t.startstop, this);
       L.DomEvent.disableClickPropagation(this.startstopButton);
 
       // next
-      this.nextButton = L.DomUtil.create('input', 'leaflet-control-rainviewer-next leaflet-bar-part btn', this.controlContainer);
+      this.nextButton = L.DomUtil.create('input', 'leaflet-control-inaflowsviewer-next leaflet-bar-part btn', this.controlContainer);
       this.nextButton.type = "button";
       this.nextButton.value = this.options.nextButtonText;
       L.DomEvent.on(this.nextButton, 'click', t.next, this);
       L.DomEvent.disableClickPropagation(this.nextButton);
 
       // label posisi (Time)
-      this.positionSliderLabel = L.DomUtil.create('label', 'leaflet-control-rainviewer-label leaflet-bar-part', this.controlContainer);
-      this.positionSliderLabel.for = "currentviewer-positionslider";
+      this.positionSliderLabel = L.DomUtil.create('label', 'leaflet-control-inaflowsviewer-label leaflet-bar-part', this.controlContainer);
+      this.positionSliderLabel.for = "inaflowsviewer-positionslider";
       this.positionSliderLabel.textContent = this.options.positionSliderLabelText;
 
       // slider posisi
-      this.positionSlider = L.DomUtil.create('input', 'leaflet-control-rainviewer-positionslider leaflet-bar-part', this.controlContainer);
+      this.positionSlider = L.DomUtil.create('input', 'leaflet-control-inaflowsviewer-positionslider leaflet-bar-part', this.controlContainer);
       this.positionSlider.type = "range";
-      this.positionSlider.id = "currentviewer-positionslider";
+      this.positionSlider.id = "inaflowsviewer-positionslider";
       this.positionSlider.min = 0;
       this.positionSlider.max = this.timestamps.length - 1;
       this.positionSlider.value = this.animationPosition;
@@ -211,14 +211,14 @@
       L.DomEvent.disableClickPropagation(this.positionSlider);
 
       // label opacity
-      this.opacitySliderLabel = L.DomUtil.create('label', 'leaflet-control-rainviewer-label leaflet-bar-part', this.controlContainer);
-      this.opacitySliderLabel.for = "currentviewer-opacityslider";
+      this.opacitySliderLabel = L.DomUtil.create('label', 'leaflet-control-inaflowsviewer-label leaflet-bar-part', this.controlContainer);
+      this.opacitySliderLabel.for = "inaflowsviewer-opacityslider";
       this.opacitySliderLabel.textContent = this.options.opacitySliderLabelText;
 
       // slider opacity
-      this.opacitySlider = L.DomUtil.create('input', 'leaflet-control-rainviewer-opacityslider leaflet-bar-part', this.controlContainer);
+      this.opacitySlider = L.DomUtil.create('input', 'leaflet-control-inaflowsviewer-opacityslider leaflet-bar-part', this.controlContainer);
       this.opacitySlider.type = "range";
-      this.opacitySlider.id = "currentviewer-opacityslider";
+      this.opacitySlider.id = "inaflowsviewer-opacityslider";
       this.opacitySlider.min = 0;
       this.opacitySlider.max = 100;
       this.opacitySlider.value = this.options.opacity * 100;
@@ -226,11 +226,11 @@
       L.DomEvent.disableClickPropagation(this.opacitySlider);
 
       // timestamp text
-      const html = '<div id="currentviewer-timestamp" class="leaflet-control-rainviewer-timestamp"></div>';
+      const html = '<div id="inaflowsviewer-timestamp" class="leaflet-control-inaflowsviewer-timestamp"></div>';
       this.controlContainer.insertAdjacentHTML('beforeend', html);
 
       // tombol close
-      this.closeButton = L.DomUtil.create('div', 'leaflet-control-rainviewer-close', this.container);
+      this.closeButton = L.DomUtil.create('div', 'leaflet-control-inaflowsviewer-close', this.container);
       L.DomEvent.on(this.closeButton, 'click', t.unload, this);
     },
 
@@ -288,7 +288,7 @@
       // arrows tetap (opacity tetap di layersArr[nextKey])
 
       // update label waktu
-      const el = document.getElementById('currentviewer-timestamp');
+      const el = document.getElementById('inaflowsviewer-timestamp');
       if (el) el.innerHTML = parseLabel(nextKey);
     },
 
@@ -358,5 +358,5 @@
   });
 
   // factory
-  L.control.currentviewer = function(opts){ return new L.Control.Currentviewer(opts); };
+  L.control.inaflowsviewer = function(opts){ return new L.Control.inaflowsviewer(opts); };
 }));
