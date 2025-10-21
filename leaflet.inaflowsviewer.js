@@ -51,10 +51,15 @@
       modelrunEndpoint: 'https://peta-maritim.bmkg.go.id/api21/modelrun',
       // Selector untuk ambil run terbaru dari JSON endpoint
       modelrunSelector: function (json, model) {
-        // Ekspektasi: json[model] = ["YYYYMMDDHHMM", ...]
+        // Ambil array ISO time misal ["2025-10-21T00:00:00Z", "2025-10-20T12:00:00Z"]
         const runs = json && json[model];
         if (!runs || !runs.length) return null;
-        return runs.slice().sort().pop(); // terbesar = terbaru
+        // Urutkan dan ambil yang paling baru
+        const latestISO = runs.sort().pop(); // "2025-10-21T00:00:00Z"
+        // Ubah ke format yang dipakai tile: "YYYYMMDDHHMM"
+        const d = new Date(latestISO);
+        const pad = n => String(n).padStart(2,'0');
+        return `${d.getUTCFullYear()}${pad(d.getUTCMonth()+1)}${pad(d.getUTCDate())}${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}`;
       },
 
       // Waktu/animasi
