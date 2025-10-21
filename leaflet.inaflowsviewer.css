@@ -45,33 +45,48 @@
   box-shadow: none;
 }
 
-.leaflet-control-inaflowsviewer-button {
+/* Tombol utama (ikon PNG via CSS, gaya Rainviewer) */
+.leaflet-control-inaflowsviewer a.leaflet-control-inaflowsviewer-button {
   display: inline-grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   margin: 6px;
   border-radius: 50%;
-  background: var(--cv-bg);
-  backdrop-filter: blur(var(--cv-blur));
-  -webkit-backdrop-filter: blur(var(--cv-blur));
+  background-color: #fff; /* fallback */
+  background-image: url("images/inaflows.png");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 28px 28px;
   border: 1px solid var(--cv-border);
   box-shadow: var(--cv-shadow-sm);
   color: var(--cv-ink);
   text-decoration: none;
   transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
 }
-.leaflet-control-inaflowsviewer-button:hover {
+.leaflet-control-inaflowsviewer a.leaflet-control-inaflowsviewer-button:hover {
   transform: translateY(-1px);
   box-shadow: var(--cv-shadow);
 }
-.leaflet-control-inaflowsviewer-button:focus {
+.leaflet-control-inaflowsviewer a.leaflet-control-inaflowsviewer-button:focus {
   outline: none;
   box-shadow: var(--cv-focus);
 }
 
+/* Retina / HiDPI */
+@media (-webkit-min-device-pixel-ratio:2), (min-resolution:192dpi) {
+  .leaflet-control-inaflowsviewer a.leaflet-control-inaflowsviewer-button {
+    background-image: url("images/inaflows@2x.png");
+  }
+}
+
+/* Saat panel terbuka, sembunyikan tombol */
+.leaflet-control-inaflowsviewer-active
+  > a.leaflet-control-inaflowsviewer-button { display: none; }
+
 /* ==== Panel (opened state) ==== */
 .leaflet-control-inaflowsviewer-active .leaflet-control-inaflowsviewer-container {
+  position: relative; /* penting untuk anchor close button */
   min-width: 360px;
   max-width: 420px;
   padding: 12px 12px 14px;
@@ -287,4 +302,11 @@
     justify-self: start;
     margin-top: 6px;
   }
+}
+
+/* Perangkat sentuh: tombol sedikit lebih besar */
+.leaflet-touch .leaflet-control-inaflowsviewer a.leaflet-control-inaflowsviewer-button {
+  width: 56px;
+  height: 56px;
+  background-size: 36px 36px;
 }
