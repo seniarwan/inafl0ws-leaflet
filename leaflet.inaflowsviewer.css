@@ -1,0 +1,290 @@
+/* leaflet.currentviewer.css
+   Elegant control for L.control.currentviewer (Sea Current “Rainviewer-style”)
+   – Works with classes used by leaflet.currentviewer.js
+*/
+
+/* ==== Design tokens (easy to tweak) ==== */
+:root {
+  --cv-bg: rgba(255, 255, 255, 0.82);
+  --cv-bg-weak: rgba(255, 255, 255, 0.55);
+  --cv-border: rgba(20, 40, 80, 0.12);
+  --cv-shadow: 0 6px 26px rgba(0, 0, 0, 0.16);
+  --cv-shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.12);
+  --cv-ink: #0f172a;            /* slate-900 */
+  --cv-ink-weak: #334155;       /* slate-700 */
+  --cv-accent: #2563eb;         /* blue-600 */
+  --cv-accent-2: #1d4ed8;       /* blue-700 */
+  --cv-success: #059669;        /* emerald-600 */
+  --cv-danger: #dc2626;         /* red-600 */
+  --cv-radius: 12px;
+  --cv-radius-lg: 14px;
+  --cv-blur: 16px;
+  --cv-focus: 0 0 0 3px rgba(37, 99, 235, 0.35);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cv-bg: rgba(18, 22, 28, 0.72);
+    --cv-bg-weak: rgba(18, 22, 28, 0.55);
+    --cv-border: rgba(255, 255, 255, 0.10);
+    --cv-shadow: 0 6px 26px rgba(0, 0, 0, 0.45);
+    --cv-shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.35);
+    --cv-ink: #e5e7eb;
+    --cv-ink-weak: #cbd5e1;
+    --cv-accent: #60a5fa;
+    --cv-accent-2: #3b82f6;
+    --cv-success: #34d399;
+    --cv-danger: #f87171;
+  }
+}
+
+/* ==== Root control button (closed state) ==== */
+.leaflet-control-inaflowsviewer.leaflet-control {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.leaflet-control-inaflowsviewer-button {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin: 6px;
+  border-radius: 50%;
+  background: var(--cv-bg);
+  backdrop-filter: blur(var(--cv-blur));
+  -webkit-backdrop-filter: blur(var(--cv-blur));
+  border: 1px solid var(--cv-border);
+  box-shadow: var(--cv-shadow-sm);
+  color: var(--cv-ink);
+  text-decoration: none;
+  transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+}
+.leaflet-control-inaflowsviewer-button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--cv-shadow);
+}
+.leaflet-control-inaflowsviewer-button:focus {
+  outline: none;
+  box-shadow: var(--cv-focus);
+}
+
+/* ==== Panel (opened state) ==== */
+.leaflet-control-inaflowsviewer-active .leaflet-control-inaflowsviewer-container {
+  min-width: 360px;
+  max-width: 420px;
+  padding: 12px 12px 14px;
+  margin: 6px;
+  border-radius: var(--cv-radius-lg);
+  background: var(--cv-bg);
+  backdrop-filter: blur(var(--cv-blur));
+  -webkit-backdrop-filter: blur(var(--cv-blur));
+  border: 1px solid var(--cv-border);
+  box-shadow: var(--cv-shadow);
+  color: var(--cv-ink);
+  font: 13px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Close “×” button */
+.leaflet-control-inaflowsviewer-close {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--cv-bg-weak);
+  border: 1px solid var(--cv-border);
+  color: var(--cv-ink);
+  display: grid;
+  place-items: center;
+  box-shadow: var(--cv-shadow-sm);
+  cursor: pointer;
+  transition: transform .15s ease, background .2s ease, box-shadow .2s ease;
+}
+.leaflet-control-inaflowsviewer-close::before {
+  content: "✕";
+  font-size: 13px;
+  line-height: 1;
+}
+.leaflet-control-inaflowsviewer-close:hover {
+  transform: translateY(-1px);
+  background: var(--cv-bg);
+  box-shadow: var(--cv-shadow);
+}
+
+/* Top row: buttons + timestamp */
+.leaflet-control-inaflowsviewer-container .btn,
+.leaflet-control-inaflowsviewer-prev,
+.leaflet-control-inaflowsviewer-next,
+.leaflet-control-inaflowsviewer-startstop {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  padding: 10px 12px;
+  margin: 0 6px 8px 0;
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--cv-bg), rgba(255,255,255,0.55));
+  border: 1px solid var(--cv-border);
+  color: var(--cv-ink);
+  box-shadow: var(--cv-shadow-sm);
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .2s ease, background .2s ease;
+}
+.leaflet-control-inaflowsviewer-prev,
+.leaflet-control-inaflowsviewer-next {
+  width: 44px;
+  padding-left: 0; padding-right: 0;
+  font-weight: 700;
+}
+.leaflet-control-inaflowsviewer-startstop {
+  background: linear-gradient(180deg, var(--cv-accent), var(--cv-accent-2));
+  color: #fff;
+  border: none;
+}
+.leaflet-control-inaflowsviewer-container .btn:hover,
+.leaflet-control-inaflowsviewer-prev:hover,
+.leaflet-control-inaflowsviewer-next:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--cv-shadow);
+}
+.leaflet-control-inaflowsviewer-startstop:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+  box-shadow: 0 6px 22px rgba(37, 99, 235, .4);
+}
+.leaflet-control-inaflowsviewer-container .btn:focus,
+.leaflet-control-inaflowsviewer-prev:focus,
+.leaflet-control-inaflowsviewer-next:focus,
+.leaflet-control-inaflowsviewer-startstop:focus {
+  outline: none;
+  box-shadow: var(--cv-focus);
+}
+
+/* Timestamp */
+.leaflet-control-inaflowsviewer-timestamp {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--cv-bg-weak);
+  border: 1px solid var(--cv-border);
+  color: var(--cv-ink-weak);
+  white-space: nowrap;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
+}
+
+/* Labels */
+.leaflet-control-inaflowsviewer-label {
+  display: inline-block;
+  margin: 8px 8px 4px 0;
+  color: var(--cv-ink-weak);
+  font-weight: 600;
+}
+
+/* Sliders (range inputs) */
+.leaflet-control-inaflowsviewer-positionslider,
+.leaflet-control-inaflowsviewer-opacityslider {
+  width: 100%;
+  margin: 2px 0 10px 0;
+  height: 28px; /* click target */
+  background: transparent;
+  cursor: pointer;
+}
+
+/* WebKit */
+.leaflet-control-inaflowsviewer-positionslider::-webkit-slider-runnable-track,
+.leaflet-control-inaflowsviewer-opacityslider::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(99,102,241,.2), rgba(59,130,246,.35));
+  border: 1px solid var(--cv-border);
+}
+.leaflet-control-inaflowsviewer-positionslider::-webkit-slider-thumb,
+.leaflet-control-inaflowsviewer-opacityslider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -6px; /* center thumb on track */
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: var(--cv-shadow-sm);
+  transition: transform .12s ease, box-shadow .2s ease;
+}
+.leaflet-control-inaflowsviewer-positionslider:active::-webkit-slider-thumb,
+.leaflet-control-inaflowsviewer-opacityslider:active::-webkit-slider-thumb {
+  transform: scale(1.06);
+  box-shadow: var(--cv-shadow);
+}
+
+/* Firefox */
+.leaflet-control-inaflowsviewer-positionslider::-moz-range-track,
+.leaflet-control-inaflowsviewer-opacityslider::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(99,102,241,.2), rgba(59,130,246,.35));
+  border: 1px solid var(--cv-border);
+}
+.leaflet-control-inaflowsviewer-positionslider::-moz-range-thumb,
+.leaflet-control-inaflowsviewer-opacityslider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: var(--cv-shadow-sm);
+  transition: transform .12s ease, box-shadow .2s ease;
+}
+
+/* Edge/IE fallback – leave default but keep spacing tidy */
+.leaflet-control-inaflowsviewer-positionslider::-ms-track,
+.leaflet-control-inaflowsviewer-opacityslider::-ms-track {
+  color: transparent;
+  background: transparent;
+  border: none;
+}
+
+/* Layout niceties */
+.leaflet-control-inaflowsviewer-container {
+  display: grid;
+  grid-template-columns: auto auto auto 1fr;
+  grid-auto-rows: min-content;
+  grid-column-gap: 8px;
+  align-items: center;
+}
+.leaflet-control-inaflowsviewer-prev,
+.leaflet-control-inaflowsviewer-startstop,
+.leaflet-control-inaflowsviewer-next {
+  grid-row: 1;
+}
+.leaflet-control-inaflowsviewer-timestamp {
+  grid-column: 4;
+  grid-row: 1;
+  justify-self: end;
+}
+.leaflet-control-inaflowsviewer-label {
+  grid-column: 1 / -1;
+}
+.leaflet-control-inaflowsviewer-positionslider,
+.leaflet-control-inaflowsviewer-opacityslider {
+  grid-column: 1 / -1;
+}
+
+/* Compact on small screens */
+@media (max-width: 480px) {
+  .leaflet-control-inaflowsviewer-active .leaflet-control-inaflowsviewer-container {
+    min-width: 280px;
+    padding: 10px 10px 12px;
+  }
+  .leaflet-control-inaflowsviewer-container {
+    grid-template-columns: auto auto auto;
+  }
+  .leaflet-control-inaflowsviewer-timestamp {
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-top: 6px;
+  }
+}
