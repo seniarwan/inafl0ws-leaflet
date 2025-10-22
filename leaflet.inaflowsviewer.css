@@ -1,97 +1,72 @@
 /* leaflet.inaflowsviewer.css
-   Elegant control for L.control.inaflowsviewer (Sea Current “Rainviewer-style”)
-   – Works with classes used by leaflet.inaflowsviewer.js
+   Compact Rainviewer-style control for L.control.inaflowsviewer
 */
 
-/* ==== Design tokens (easy to tweak) ==== */
+/* ==== Design tokens ==== */
 :root {
-  --cv-bg: rgba(255, 255, 255, 0.82);
+  --cv-bg: rgba(255, 255, 255, 0.85);
   --cv-bg-weak: rgba(255, 255, 255, 0.55);
   --cv-border: rgba(20, 40, 80, 0.12);
-  --cv-shadow: 0 6px 26px rgba(0, 0, 0, 0.16);
-  --cv-shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.12);
-  --cv-ink: #0f172a;            /* slate-900 */
-  --cv-ink-weak: #334155;       /* slate-700 */
-  --cv-accent: #2563eb;         /* blue-600 */
-  --cv-accent-2: #1d4ed8;       /* blue-700 */
-  --cv-success: #059669;        /* emerald-600 */
-  --cv-danger: #dc2626;         /* red-600 */
-  --cv-radius: 12px;
-  --cv-radius-lg: 14px;
+  --cv-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  --cv-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.12);
+  --cv-ink: #0f172a;
+  --cv-ink-weak: #334155;
+  --cv-accent: #2563eb;
+  --cv-accent-2: #1d4ed8;
+  --cv-radius: 10px;
   --cv-blur: 16px;
-  --cv-focus: 0 0 0 3px rgba(37, 99, 235, 0.35);
+  --cv-focus: 0 0 0 2px rgba(37, 99, 235, 0.3);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --cv-bg: rgba(18, 22, 28, 0.72);
-    --cv-bg-weak: rgba(18, 22, 28, 0.55);
-    --cv-border: rgba(255, 255, 255, 0.10);
-    --cv-shadow: 0 6px 26px rgba(0, 0, 0, 0.45);
-    --cv-shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.35);
+    --cv-bg: rgba(22, 26, 33, 0.8);
+    --cv-bg-weak: rgba(22, 26, 33, 0.55);
+    --cv-border: rgba(255, 255, 255, 0.1);
     --cv-ink: #e5e7eb;
     --cv-ink-weak: #cbd5e1;
     --cv-accent: #60a5fa;
     --cv-accent-2: #3b82f6;
-    --cv-success: #34d399;
-    --cv-danger: #f87171;
   }
 }
 
-/* ==== Root control button (closed state) ==== */
+/* ==== Root button (closed) ==== */
 .leaflet-control-inaflowsviewer.leaflet-control {
   border: none;
   background: transparent;
   box-shadow: none;
 }
 
-/* Tombol utama (ikon PNG via CSS, gaya Rainviewer) */
 .leaflet-control-inaflowsviewer a.leaflet-control-inaflowsviewer-button {
   display: inline-grid;
   place-items: center;
-  width: 42px;
-  height: 42px;
-  margin: 6px;
+  width: 110px;
+  height: 30px;
+  margin: 2px;
   border-radius: 50%;
-  background-color: #fff; /* fallback */
-  background-image: url("images/inaflows.png");
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: 28px 28px;
+  background: #fff url("images/inaflows.png") no-repeat center center;
+  background-size: auto 30px;
   border: 1px solid var(--cv-border);
   box-shadow: var(--cv-shadow-sm);
-  color: var(--cv-ink);
-  text-decoration: none;
-  transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+  transition: transform .15s ease, box-shadow .2s ease;
 }
 .leaflet-control-inaflowsviewer a.leaflet-control-inaflowsviewer-button:hover {
   transform: translateY(-1px);
   box-shadow: var(--cv-shadow);
 }
-.leaflet-control-inaflowsviewer a.leaflet-control-inaflowsviewer-button:focus {
-  outline: none;
-  box-shadow: var(--cv-focus);
-}
-
-/* Retina / HiDPI */
-@media (-webkit-min-device-pixel-ratio:2), (min-resolution:192dpi) {
-  .leaflet-control-inaflowsviewer a.leaflet-control-inaflowsviewer-button {
-    background-image: url("images/inaflows@2x.png");
-  }
-}
-
-/* Saat panel terbuka, sembunyikan tombol */
 .leaflet-control-inaflowsviewer-active
-  > a.leaflet-control-inaflowsviewer-button { display: none; }
+  > a.leaflet-control-inaflowsviewer-button {
+  display: none;
+}
 
-/* ==== Panel (opened state) ==== */
+/* ==== Panel (opened) ==== */
 .leaflet-control-inaflowsviewer-active .leaflet-control-inaflowsviewer-container {
-  position: relative; /* penting untuk anchor close button */
-  min-width: 360px;
-  max-width: 420px;
-  padding: 12px 12px 14px;
+  position: relative;
+  min-width: 280px;
+  max-width: 320px;
+  padding: 10px 12px 14px;
   margin: 6px;
-  border-radius: var(--cv-radius-lg);
+  border-radius: var(--cv-radius);
   background: var(--cv-bg);
   backdrop-filter: blur(var(--cv-blur));
   -webkit-backdrop-filter: blur(var(--cv-blur));
@@ -99,16 +74,21 @@
   box-shadow: var(--cv-shadow);
   color: var(--cv-ink);
   font: 13px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-column-gap: 6px;
+  grid-auto-rows: min-content;
+  align-items: center;
 }
 
-/* Close “×” button */
+/* Close button */
 .leaflet-control-inaflowsviewer-close {
   position: absolute;
   top: -8px;
   right: -8px;
-  width: 28px;
-  height: 28px;
-  border-radius: 999px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
   background: var(--cv-bg-weak);
   border: 1px solid var(--cv-border);
   color: var(--cv-ink);
@@ -120,98 +100,64 @@
 }
 .leaflet-control-inaflowsviewer-close::before {
   content: "✕";
-  font-size: 13px;
-  line-height: 1;
+  font-size: 12px;
 }
 .leaflet-control-inaflowsviewer-close:hover {
   transform: translateY(-1px);
   background: var(--cv-bg);
-  box-shadow: var(--cv-shadow);
 }
 
-/* Top row: buttons + timestamp */
-.leaflet-control-inaflowsviewer-container .btn,
+/* Buttons */
 .leaflet-control-inaflowsviewer-prev,
 .leaflet-control-inaflowsviewer-next,
 .leaflet-control-inaflowsviewer-startstop {
   appearance: none;
   -webkit-appearance: none;
   border: none;
-  padding: 10px 12px;
-  margin: 0 6px 8px 0;
-  border-radius: 10px;
-  background: linear-gradient(180deg, var(--cv-bg), rgba(255,255,255,0.55));
+  padding: 8px 10px;
+  margin: 0 4px 6px 0;
+  border-radius: 8px;
+  background: var(--cv-bg-weak);
   border: 1px solid var(--cv-border);
-  color: var(--cv-ink);
   box-shadow: var(--cv-shadow-sm);
+  color: var(--cv-ink);
   cursor: pointer;
-  transition: transform .12s ease, box-shadow .2s ease, background .2s ease;
+  transition: transform .12s ease, box-shadow .2s ease;
 }
 .leaflet-control-inaflowsviewer-prev,
 .leaflet-control-inaflowsviewer-next {
-  width: 44px;
-  padding-left: 0; padding-right: 0;
   font-weight: 700;
 }
 .leaflet-control-inaflowsviewer-startstop {
   background: linear-gradient(180deg, var(--cv-accent), var(--cv-accent-2));
   color: #fff;
-  border: none;
 }
-.leaflet-control-inaflowsviewer-container .btn:hover,
 .leaflet-control-inaflowsviewer-prev:hover,
-.leaflet-control-inaflowsviewer-next:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--cv-shadow);
-}
+.leaflet-control-inaflowsviewer-next:hover,
 .leaflet-control-inaflowsviewer-startstop:hover {
   transform: translateY(-1px);
-  filter: brightness(1.04);
-  box-shadow: 0 6px 22px rgba(37, 99, 235, .4);
-}
-.leaflet-control-inaflowsviewer-container .btn:focus,
-.leaflet-control-inaflowsviewer-prev:focus,
-.leaflet-control-inaflowsviewer-next:focus,
-.leaflet-control-inaflowsviewer-startstop:focus {
-  outline: none;
-  box-shadow: var(--cv-focus);
 }
 
-/* Timestamp */
-.leaflet-control-inaflowsviewer-timestamp {
-  display: inline-block;
-  margin-left: 8px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: var(--cv-bg-weak);
-  border: 1px solid var(--cv-border);
-  color: var(--cv-ink-weak);
-  white-space: nowrap;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
-}
-
-/* Labels */
+/* Labels and sliders */
 .leaflet-control-inaflowsviewer-label {
-  display: inline-block;
-  margin: 8px 8px 4px 0;
-  color: var(--cv-ink-weak);
+  grid-column: 1 / -1;
+  margin: 6px 0 2px 0;
   font-weight: 600;
+  color: var(--cv-ink-weak);
 }
-
-/* Sliders (range inputs) */
 .leaflet-control-inaflowsviewer-positionslider,
 .leaflet-control-inaflowsviewer-opacityslider {
+  grid-column: 1 / -1;
   width: 100%;
-  margin: 2px 0 10px 0;
-  height: 28px; /* click target */
+  height: 22px;
   background: transparent;
   cursor: pointer;
 }
 
-/* WebKit */
+/* Slider track */
 .leaflet-control-inaflowsviewer-positionslider::-webkit-slider-runnable-track,
 .leaflet-control-inaflowsviewer-opacityslider::-webkit-slider-runnable-track {
-  height: 6px;
+  height: 5px;
   border-radius: 999px;
   background: linear-gradient(90deg, rgba(99,102,241,.2), rgba(59,130,246,.35));
   border: 1px solid var(--cv-border);
@@ -220,93 +166,61 @@
 .leaflet-control-inaflowsviewer-opacityslider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  margin-top: -6px; /* center thumb on track */
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
+  margin-top: -6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
   background: #fff;
-  border: 1px solid rgba(0,0,0,0.08);
+  border: 1px solid rgba(0,0,0,0.1);
   box-shadow: var(--cv-shadow-sm);
-  transition: transform .12s ease, box-shadow .2s ease;
-}
-.leaflet-control-inaflowsviewer-positionslider:active::-webkit-slider-thumb,
-.leaflet-control-inaflowsviewer-opacityslider:active::-webkit-slider-thumb {
-  transform: scale(1.06);
-  box-shadow: var(--cv-shadow);
-}
-
-/* Firefox */
-.leaflet-control-inaflowsviewer-positionslider::-moz-range-track,
-.leaflet-control-inaflowsviewer-opacityslider::-moz-range-track {
-  height: 6px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(99,102,241,.2), rgba(59,130,246,.35));
-  border: 1px solid var(--cv-border);
 }
 .leaflet-control-inaflowsviewer-positionslider::-moz-range-thumb,
 .leaflet-control-inaflowsviewer-opacityslider::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
   background: #fff;
-  border: 1px solid rgba(0,0,0,0.08);
-  box-shadow: var(--cv-shadow-sm);
-  transition: transform .12s ease, box-shadow .2s ease;
+  border: 1px solid rgba(0,0,0,0.1);
 }
 
-/* Edge/IE fallback – leave default but keep spacing tidy */
-.leaflet-control-inaflowsviewer-positionslider::-ms-track,
-.leaflet-control-inaflowsviewer-opacityslider::-ms-track {
-  color: transparent;
+/* Timestamp centered below sliders */
+.leaflet-control-inaflowsviewer-timestamp {
+  grid-column: 1 / -1;
+  justify-self: center;
+  margin-top: 10px;
+  font-weight: 600;
+  color: var(--cv-ink);
   background: transparent;
   border: none;
+  box-shadow: none;
 }
 
-/* Layout niceties */
-.leaflet-control-inaflowsviewer-container {
-  display: grid;
-  grid-template-columns: auto auto auto 1fr;
-  grid-auto-rows: min-content;
-  grid-column-gap: 8px;
-  align-items: center;
-}
-.leaflet-control-inaflowsviewer-prev,
-.leaflet-control-inaflowsviewer-startstop,
-.leaflet-control-inaflowsviewer-next {
-  grid-row: 1;
-}
-.leaflet-control-inaflowsviewer-timestamp {
-  grid-column: 4;
-  grid-row: 1;
-  justify-self: end;
-}
-.leaflet-control-inaflowsviewer-label {
+/* Legenda */
+.leaflet-control-inaflowsviewer-legenda {
   grid-column: 1 / -1;
-}
-.leaflet-control-inaflowsviewer-positionslider,
-.leaflet-control-inaflowsviewer-opacityslider {
-  grid-column: 1 / -1;
+  text-align: center;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--cv-border);
 }
 
-/* Compact on small screens */
+.leaflet-control-inaflowsviewer-legenda img {
+  width: 100%;
+  max-width: 240px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Compact small screens */
 @media (max-width: 480px) {
   .leaflet-control-inaflowsviewer-active .leaflet-control-inaflowsviewer-container {
-    min-width: 280px;
-    padding: 10px 10px 12px;
-  }
-  .leaflet-control-inaflowsviewer-container {
-    grid-template-columns: auto auto auto;
-  }
-  .leaflet-control-inaflowsviewer-timestamp {
-    grid-column: 1 / -1;
-    justify-self: start;
-    margin-top: 6px;
+    min-width: 260px;
+    max-width: 300px;
   }
 }
 
-/* Perangkat sentuh: tombol sedikit lebih besar */
-.leaflet-touch .leaflet-control-inaflowsviewer a.leaflet-control-inaflowsviewer-button {
-  width: 56px;
-  height: 56px;
-  background-size: 36px 36px;
+/* Hide landmask button */
+.leaflet-control-inaflowsviewer-landmaskbtn {
+  display: none !important;
 }
