@@ -3,8 +3,9 @@
 // - Auto-detect latest modelrun from /api21/modelrun (ISO → YYYYMMDDHHMM)
 // - Builds a rolling time series (default: 8 frames × 3 hours = 24h)
 // - Shows magnitude (mpl_req) and optional arrows (arr_req)
+// - Landmask toggle (vector PBF, layer `indocg`) di atas raster arus
 //
-// Requires Leaflet. Optional: pair with your CSS (e.g., leaflet.inaflowsviewer.css)
+// Requires Leaflet + Leaflet.VectorGrid. Optional: pair with leaflet.inaflowsviewer.css
 
 (function (factory) {
   if (typeof define === 'function' && define.amd) {
@@ -24,13 +25,33 @@
     if (typeof d === 'string') return d;
     return `${d.getUTCFullYear()}${pad(d.getUTCMonth()+1)}${pad(d.getUTCDate())}${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}`;
   }
+
   function parseLabel(key){
-    // 'YYYYMMDDHHMM' → "Tue, 21 Oct 2025 21:00 UTC"
+    // 'YYYYMMDDHHMM' → "Rabu, 22 Okt 2025 01:00 WIB"
     if (!(typeof key === 'string' && key.length >= 12)) return '';
-    const Y=+key.slice(0,4), M=+key.slice(4,6), D=+key.slice(6,8), h=+key.slice(8,10), m=+key.slice(10,12);
-    const dd = new Date(Date.UTC(Y, M-1, D, h, m, 0));
-    return dd.toUTCString().split(' ').slice(0,5).join(' ')+' UTC';
+    const Y = +key.slice(0,4),
+          M = +key.slice(4,6),
+          D = +key.slice(6,8),
+          h = +key.slice(8,10),
+          m = +key.slice(10,12);
+
+    // ubah ke UTC, lalu tambahkan +7 jam (WIB)
+    const utcDate = new Date(Date.UTC(Y, M - 1, D, h, m, 0));
+    const wibDate = new Date(utcDate.getTime() + 7 * 60 * 60 * 1000);
+
+    // format tanggal dalam bahasa Inggris (bisa kamu ganti ke Indonesia)
+    const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    const dayName = days[wibDate.getUTCDay()];
+    const monthName = months[wibDate.getUTCMonth()];
+
+    const pad = (n)=>String(n).padStart(2,'0');
+    const hh = pad(wibDate.getUTCHours());
+    const mm = pad(wibDate.getUTCMinutes());
+
+    return `${dayName}, ${pad(wibDate.getUTCDate())} ${monthName} ${wibDate.getUTCFullYear()} ${hh}:${mm} WIB`;
   }
+
 
   // ============== Control ==============
   L.Control.inaflowsviewer = L.Control.extend({
@@ -44,7 +65,7 @@
       positionSliderLabelText: 'Time:',
       opacitySliderLabelText: 'Opacity:',
       animationInterval: 500,
-      opacity: 0.6,
+      opacity: 0.5,
 
       // BMKG Sea Current (INAFLOWS) config
       baseUrl: 'https://peta-maritim.bmkg.go.id/api21',
@@ -66,8 +87,18 @@
       showArrows: true,
       arrowsOpacity: 0.9,
 
-      // zIndex
+      // zIndex (arus raster = 400, panah = 401; landmask > ini)
       zIndex: 400,
+
+      // Landmask (vector PBF) toggle
+      landMaskEnabled: true,                    // tampilkan tombol
+      landMaskInitiallyOn: false,               // kondisi awal
+      landMaskUrl: 'https://tiles.circlegeo.com/data/indocg/{z}/{x}/{y}.pbf',
+      landMaskLayerName: 'indocg',
+      landMaskColor: '#0b1220',                 // sesuaikan dgn basemap
+      landMaskOpacity: 1.0,
+      landMaskZIndex: 650,                      // di atas arus & panah
+      landMaskMaxZoom: 11,
 
       // CSS class prefix (use 'leaflet-control-inaflowsviewer' by default)
       classPrefix: 'leaflet-control-inaflowsviewer'
@@ -78,10 +109,15 @@
       this._map = map;
 
       this.timestamps = [];
-      this.layersMag = {}; // timeKey → L.TileLayer (magnitude)
-      this.layersArr = {}; // timeKey → L.TileLayer (arrows)
+      this.layersMag = {};
+      this.layersArr = {};
       this.animationPosition = 0;
       this.animationTimer = null;
+
+      // landmask state
+      this._landPane = null;
+      this._landLayer = null;
+      this._landOn = !!this.options.landMaskInitiallyOn;
 
       // Root container + open button
       const rootCls = `${this.options.classPrefix} leaflet-bar leaflet-control`;
@@ -125,6 +161,9 @@
       this.layersArr = {};
       this.timestamps = [];
       this.animationPosition = 0;
+
+      // remove landmask if present
+      this._removeLandMask();
     },
 
     /* ================= main load ================ */
@@ -143,7 +182,8 @@
       } else {
         this.timestamps = this.options.times.map(fmtKey);
       }
-      this.animationPosition = Math.max(0, this.timestamps.length - 1);
+      // start at latest index (<= now) by default
+      this.animationPosition = this._bestStartIndex();
 
       // 3) build UI
       L.DomUtil.addClass(this.container, `${this.options.classPrefix}-active`);
@@ -152,6 +192,9 @@
       // 4) show first & preload next
       this.showFrame(this.animationPosition);
       this._preload(this.animationPosition + 1);
+
+      // 5) if landmask initially on
+      if (this._landOn) this._addLandMask();
     },
 
     /* ================== UI ================== */
@@ -176,6 +219,12 @@
       this.controlContainer.appendChild(this.startstopButton);
       this.controlContainer.appendChild(this.nextButton);
 
+      // Landmask toggle button (opsional)
+      if (this.options.landMaskEnabled) {
+        this.landmaskButton = this._mkBtn(`${p}-landmaskbtn leaflet-bar-part btn`, (this._landOn ? 'Landmask ✓' : 'Landmask'), this._toggleLandMask);
+        this.controlContainer.appendChild(this.landmaskButton);
+      }
+
       // labels & sliders
       this.positionSliderLabel = this._mkLabel(`${p}-label`, 'cv-pos-label', this.options.positionSliderLabelText);
       this.controlContainer.appendChild(this.positionSliderLabel);
@@ -194,6 +243,16 @@
       // timestamp text
       const timeEl = L.DomUtil.create('div', `${p}-timestamp`, this.controlContainer);
       timeEl.id = 'cv-timestamp';
+
+      // Add legenda below the timestamp
+      this.legendaContainer = L.DomUtil.create('div', `${p}-legenda`, this.controlContainer);
+      this.legendaContainer.id = 'cv-legenda';
+      this.controlContainer.appendChild(this.legendaContainer);
+
+      // Menambahkan gambar legenda secara langsung
+      const legendaImg = L.DomUtil.create('img', 'cv-legenda-img', this.legendaContainer);
+      legendaImg.src = 'https://raw.githubusercontent.com/seniarwan/inafl0ws-leaflet/refs/heads/main/legenda.png'; // Path gambar legenda
+      legendaImg.alt = 'Legenda';
 
       // close button
       this.closeButton = L.DomUtil.create('div', `${p}-close`, this.container);
@@ -350,6 +409,68 @@
       this.showFrame(this.animationPosition + 1);
     },
 
+    /* ======== Landmask (vector PBF) ======== */
+    _initLandMaskPane: function () {
+      if (this._landPane) return;
+      const paneName = 'inaflows-landmask';
+      this._landPane = this._map.createPane(paneName);
+      this._landPane.style.zIndex = (this.options.landMaskZIndex || 650) + '';
+      this._landPane.style.pointerEvents = 'none';
+      this._landPaneId = paneName;
+    },
+
+    _addLandMask: function () {
+      if (!this.options.landMaskEnabled) return;
+      if (!window.L || !L.vectorGrid || !L.vectorGrid.protobuf) {
+        console.warn('[inaflowsviewer] Leaflet.VectorGrid not found. Include Leaflet.VectorGrid before this script.');
+        return;
+      }
+      this._initLandMaskPane();
+      if (this._landLayer) return;
+
+      const url = this.options.landMaskUrl;
+      const layerName = this.options.landMaskLayerName || 'indocg';
+      const color = this.options.landMaskColor || '#0b1220';
+      const fillOpacity = this.options.landMaskOpacity == null ? 1.0 : this.options.landMaskOpacity;
+
+      this._landLayer = L.vectorGrid.protobuf(url, {
+        pane: this._landPaneId,
+        maxZoom: this.options.landMaskMaxZoom || 11,
+        rendererFactory: L.canvas.tile,
+        interactive: false,
+        vectorTileLayerStyles: {
+          [layerName]: {
+            fill: true,
+            fillColor: color,
+            fillOpacity: fillOpacity,
+            color: color,
+            opacity: fillOpacity,
+            weight: 0
+          }
+        }
+      }).addTo(this._map);
+    },
+
+    _removeLandMask: function () {
+      if (this._landLayer && this._map) {
+        this._map.removeLayer(this._landLayer);
+      }
+      this._landLayer = null;
+    },
+
+    _toggleLandMask: function (e) {
+      L.DomEvent.stop(e);
+      this._landOn = !this._landOn;
+      if (this._landOn) {
+        this._addLandMask();
+      } else {
+        this._removeLandMask();
+      }
+      if (this.landmaskButton) {
+        this.landmaskButton.value = this._landOn ? 'Landmask ✓' : 'Landmask';
+      }
+    },
+
     /* ================ internal helpers ================ */
     _getLatestModelrun: async function () {
       const endpoint = this.options.modelrunEndpoint || 'https://peta-maritim.bmkg.go.id/api21/modelrun';
@@ -368,6 +489,23 @@
         const now = new Date();
         return `${now.getUTCFullYear()}${pad(now.getUTCMonth()+1)}${pad(now.getUTCDate())}0000`;
       }
+    },
+
+    // key → ms
+    _keyToMs: function (k) {
+      const Y = +k.slice(0,4), M = +k.slice(4,6), D = +k.slice(6,8),
+            h = +k.slice(8,10), m = +k.slice(10,12);
+      return Date.UTC(Y, M - 1, D, h, m, 0);
+    },
+
+    // pilih indeks frame terakhir yang <= now (UTC)
+    _bestStartIndex: function (nowMs = Date.now()) {
+      if (!this.timestamps || !this.timestamps.length) return 0;
+      const t = this.timestamps;
+      for (let i = t.length - 1; i >= 0; i--) {
+        if (this._keyToMs(t[i]) <= nowMs) return i;
+      }
+      return 0;
     },
 
     _snap3hUTC: function (date = new Date()) {
@@ -393,4 +531,3 @@
     return new L.Control.inaflowsviewer(opts);
   };
 }));
-
